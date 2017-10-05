@@ -1,12 +1,37 @@
 import React from 'react'
 import { Link, Route } from 'react-router-dom'
-// import * as BooksAPI from './BooksAPI'
+import * as BooksAPI from './BooksAPI'
 import './App.css'
 
 class BooksApp extends React.Component {
-  state = {};
+  state = {
+    shelf: {
+
+    },
+    books: {
+
+    },
+    query: '',
+  };
+
+  componentDidMount() {
+    BooksAPI.getAll().then((books) => {
+      const shelf =
+        books.reduce((shelf, book) => {
+          if ( book && book.shelf ) {
+            shelf[book.shelf] ?
+              shelf[book.shelf].push(book) :
+              shelf[book.shelf] = [ book ];
+          }
+          return shelf;
+        }, {})
+      this.setState({ books, shelf });
+    })
+  }
 
   render() {
+    const { query, books, shelf } = this.state;
+
     return (
       <div className="app">
         <Route path="/search" render={() => (
