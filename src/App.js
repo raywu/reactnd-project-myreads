@@ -7,13 +7,10 @@ import Book from './Book.js'
 
 class BooksApp extends React.Component {
   state = {
-    shelf: {
-
-    },
-    books: {
-
-    },
+    shelf: {},
+    books: {},
     query: '',
+    searchResults: [],
   };
 
   updateQuery = (value) => {
@@ -36,14 +33,21 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const { query, books, shelf } = this.state;
-    let searchingBooks, match;
+    const { query, books, shelf, searchResults } = this.state,
+      // TODO: parse ../SEARCH_TERMS.md directly
+      searchTerms = ['Android', 'Art', 'Artificial Intelligence', 'Astronomy', 'Austen', 'Baseball', 'Basketball', 'Bhagat', 'Biography', 'Brief', 'Business', 'Camus', 'Cervantes', 'Christie', 'Classics', 'Comics', 'Cook', 'Cricket', 'Cycling', 'Desai', 'Design', 'Development', 'Digital Marketing', 'Drama', 'Drawing', 'Dumas', 'Education', 'Everything', 'Fantasy', 'Film', 'Finance', 'First', 'Fitness', 'Football', 'Future', 'Games', 'Gandhi', 'Homer', 'Horror', 'Hugo', 'Ibsen', 'Journey',     'Kafka', 'King', 'Lahiri', 'Larsson', 'Learn', 'Literary Fiction', 'Make', 'Manage', 'Marquez', 'Money', 'Mystery', 'Negotiate', 'Painting', 'Philosophy', 'Photography', 'Poetry', 'Production', 'Programming', 'React', 'Redux', 'River', 'Robotics', 'Rowling', 'Satire', 'Science Fiction', 'Shakespeare', 'Singh', 'Swimming', 'Tale', 'Thrun', 'Time', 'Tolstoy', 'Travel', 'Ultimate', 'Virtual Reality', 'Web Development', 'iOS'
+      ];
+    let match, searchQuery;
 
     if (query) {
       match = new RegExp(escapeRegExp(query), 'i');
-      searchingBooks = books.filter((book) => match.test(book.title));
-    } else {
-      searchingBooks = books;
+      searchQuery = searchTerms.filter((term) => match.test(term));
+    }
+
+    if (searchQuery && searchQuery.length === 1) {
+      BooksAPI.search(searchQuery[0]).then((books) => {
+        this.setState( { searchResults: books } );
+      });
     }
 
     return (
@@ -72,7 +76,7 @@ class BooksApp extends React.Component {
             <div className="search-books-results">
               <ol className="books-grid">
                 {
-                  searchingBooks && searchingBooks.map((book) => {
+                  searchResults && searchResults.map((book) => {
                     return <Book key={ book.id } book={ book } />
                   })
                 }
