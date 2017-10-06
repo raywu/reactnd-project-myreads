@@ -3,6 +3,7 @@ import { Link, Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import escapeRegExp from 'escape-string-regexp'
 import './App.css'
+import Shelf from './Shelf.js'
 import Book from './Book.js'
 
 class BooksApp extends React.Component {
@@ -91,42 +92,9 @@ class BooksApp extends React.Component {
             </div>
             <div className="list-books-content">
               <div>
-                <div className="bookshelf">
-                  <h2 className="bookshelf-title">Currently Reading</h2>
-                  <div className="bookshelf-books">
-                    <ol className="books-grid">
-                      {
-                        shelf && shelf.currentlyReading && shelf.currentlyReading.map(( book ) => {
-                          return <Book key={ book.id } book={ book } />
-                        })
-                      }
-                    </ol>
-                  </div>
-                </div>
-                <div className="bookshelf">
-                  <h2 className="bookshelf-title">Want to Read</h2>
-                  <div className="bookshelf-books">
-                    <ol className="books-grid">
-                      {
-                        shelf && shelf.wantToRead && shelf.wantToRead.map(( book ) => {
-                          return <Book key={ book.id } book={ book } />
-                        })
-                      }
-                    </ol>
-                  </div>
-                </div>
-                <div className="bookshelf">
-                  <h2 className="bookshelf-title">Read</h2>
-                  <div className="bookshelf-books">
-                    <ol className="books-grid">
-                      {
-                        shelf && shelf.read && shelf.read.map(( book ) => {
-                          return <Book key={ book.id } book={ book } />
-                        })
-                      }
-                    </ol>
-                  </div>
-                </div>
+                <Shelf shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
+                <Shelf shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
+                <Shelf shelfName="Read" shelf={ shelf && shelf.read } />
               </div>
             </div>
             <div className="open-search">
