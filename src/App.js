@@ -3,8 +3,8 @@ import { Link, Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import escapeRegExp from 'escape-string-regexp'
 import './App.css'
+import Search from './Search.js'
 import Shelf from './Shelf.js'
-import Book from './Book.js'
 
 class BooksApp extends React.Component {
   constructor(props) {
@@ -74,28 +74,11 @@ class BooksApp extends React.Component {
     return (
       <div className="app">
         <Route path="/search" render={() => (
-          <div className="search-books">
-            <div className="search-books-bar">
-              <Link className="close-search" to="/">Close</Link>
-              <div className="search-books-input-wrapper">
-                <input
-                  type="text"
-                  placeholder="Search by title or author"
-                  value={query}
-                  onChange={(event) => this.updateQuery(event.target.value)} />
-
-              </div>
-            </div>
-            <div className="search-books-results">
-              <ol className="books-grid">
-                {
-                  searchResults && searchResults.map((book) => {
-                    return <Book handleShelfChange={this.handleShelfChange} key={ book.id } book={ book } />
-                  })
-                }
-              </ol>
-            </div>
-          </div>
+          <Search
+            searchResults={ searchResults }
+            handleShelfChange={ this.handleShelfChange }
+            updateQuery={ this.updateQuery }
+            query={ query } />
         )} />
         <Route exact path="/" render={() => (
           <div className="list-books">
