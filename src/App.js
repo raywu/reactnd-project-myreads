@@ -10,7 +10,7 @@ class BooksApp extends React.Component {
   constructor(props) {
     super(props);
 
-    this.handleShelfChange = this.handleShelfChange.bind(this); // this binds handleShelfChange to App.js
+    this.handleShelfChange = this.handleShelfChange.bind(this); // this binds handleShelfChange to App.js, followed explanation from https://stackoverflow.com/questions/37795133/react-setstate-between-components-es6
   }
 
   state = {
@@ -47,7 +47,7 @@ class BooksApp extends React.Component {
     });
   }
 
-  updateQuery = (value) => {
+  updateQuery = (value) => { // followed example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
     this.setState({ query: value.trim() });
   }
 
