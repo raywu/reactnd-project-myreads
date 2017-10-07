@@ -1,43 +1,71 @@
 import React from 'react'
-import { Link, Route } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
-import escapeRegExp from 'escape-string-regexp'
+import * as _ from 'lodash'
 import './App.css'
 import Search from './Search.js'
-import Shelf from './Shelf.js'
+import Main from './Main.js'
 
 class BooksApp extends React.Component {
   constructor(props) {
     super(props);
 
+    this.updateQuery = this.updateQuery.bind(this); // this binds updateQuery to BooksApp
     this.handleShelfChange = this.handleShelfChange.bind(this); // this binds handleShelfChange to App.js, followed explanation from https://stackoverflow.com/questions/37795133/react-setstate-between-components-es6
   }
 
   state = {
-    shelf: {},
+    shelves: {},
     books: {},
     query: '',
     searchResults: [],
+    typingTimeout: 0,
   };
 
-  reload() {
+  groupBooks(books) {
+    return books.reduce((shelves, book) => {
+      if ( book && book.shelf && book.shelf !== 'none' ) {
+        shelves[book.shelf] ?
+          shelves[book.shelf].push(book) :
+          shelves[book.shelf] = [ book ];
+      }
+      return shelves;
+    }, {})
+  }
+
+  loadBooks() {
     BooksAPI.getAll().then((books) => {
-      const shelf =
-        books.reduce((shelf, book) => {
-          if ( book && book.shelf ) {
-            shelf[book.shelf] ?
-              shelf[book.shelf].push(book) :
-              shelf[book.shelf] = [ book ];
-          }
-          return shelf;
-        }, {})
-      this.setState({ books, shelf });
+      const shelves = this.groupBooks(books);
+      this.setState({ books, shelves });
     })
   }
 
+  // updateShelves(books) {
+  //   const shelves = this.groupBooks(books);
+  //   this.setState({ shelves });
+  // }
+
   handleShelfChange(book, event) {
-    BooksAPI.update(book, event.target.value).then((shelf) => {
-      this.reload();
+    // const targetShelf = event.target.value,
+    //   searchResults = this.state.searchResults;
+    // let existingBooks = this.state.books;
+    //
+    // BooksAPI.update(book, targetShelf).then((newShelves) => {
+    //   // TODO: use newShelves
+    //   if (existingBooks.includes(book)) {
+    //     _.find(existingBooks, (eb) => { return eb === book }).shelf = targetShelf;
+    //     this.updateShelves(existingBooks)
+    //   } else {
+    //     const newBook = _.find(searchResults, (srb) => { return srb === book })
+    //     newBook.shelf = targetShelf;
+    //     existingBooks.push(newBook);
+    //     this.updateShelves(existingBooks);
+    //   }
+    // });
+
+    const targetShelf = event.target.value;
+    BooksAPI.update(book, targetShelf).then((newShelves) => {
+      this.loadBooks();
     });
   }
 
@@ -47,28 +75,31 @@ class BooksApp extends React.Component {
     });
   }
 
-  updateQuery = (value) => { // followed example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
-    this.setState({ query: value.trim() });
+  // followed updateQuery example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
+  // followed setTimeout example here https://stackoverflow.com/questions/42217121/searching-in-react-when-user-stops-typing
+  // TODO: keystroke performance issue still persists; there is a lag
+  updateQuery = (value) => {
+    if (this.state.typingTimeout) {
+       clearTimeout(this.state.typingTimeout);
+    }
+
+    this.setState({
+      query: value.replace(/\W/g, ' ').trim(),
+      typingTimeout: setTimeout(() => {
+        this.searchBooks(this.state.query);
+      }, 1000)
+    });
   }
 
   componentDidMount() {
-    this.reload();
+    this.loadBooks();
   }
 
   render() {
-    const { query, shelf, searchResults } = this.state,
-      // TODO: parse ../SEARCH_TERMS.md directly
-      searchTerms = ['Android', 'Art', 'Artificial Intelligence', 'Astronomy', 'Austen', 'Baseball', 'Basketball', 'Bhagat', 'Biography', 'Brief', 'Business', 'Camus', 'Cervantes', 'Christie', 'Classics', 'Comics', 'Cook', 'Cricket', 'Cycling', 'Desai', 'Design', 'Development', 'Digital Marketing', 'Drama', 'Drawing', 'Dumas', 'Education', 'Everything', 'Fantasy', 'Film', 'Finance', 'First', 'Fitness', 'Football', 'Future', 'Games', 'Gandhi', 'Homer', 'Horror', 'Hugo', 'Ibsen', 'Journey',     'Kafka', 'King', 'Lahiri', 'Larsson', 'Learn', 'Literary Fiction', 'Make', 'Manage', 'Marquez', 'Money', 'Mystery', 'Negotiate', 'Painting', 'Philosophy', 'Photography', 'Poetry', 'Production', 'Programming', 'React', 'Redux', 'River', 'Robotics', 'Rowling', 'Satire', 'Science Fiction', 'Shakespeare', 'Singh', 'Swimming', 'Tale', 'Thrun', 'Time', 'Tolstoy', 'Travel', 'Ultimate', 'Virtual Reality', 'Web Development', 'iOS'
-      ];
-    let match, searchQuery;
+    const { query, shelves, searchResults, books } = this.state;
 
     if (query) {
-      match = new RegExp(escapeRegExp(query), 'i');
-      searchQuery = searchTerms.filter((term) => match.test(term));
-    }
-
-    if (searchQuery && searchQuery.length === 1) {
-      this.searchBooks(searchQuery[0]);
+      this.searchBooks(query); // TODO: examine performance issue; callbacks make key stroke changes slow
     }
 
     return (
@@ -78,24 +109,13 @@ class BooksApp extends React.Component {
             searchResults={ searchResults }
             handleShelfChange={ this.handleShelfChange }
             updateQuery={ this.updateQuery }
-            query={ query } />
+            query={ query }
+            existingBooks={ books } />
         )} />
         <Route exact path="/" render={() => (
-          <div className="list-books">
-            <div className="list-books-title">
-              <h1>MyReads</h1>
-            </div>
-            <div className="list-books-content">
-              <div>
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Read" shelf={ shelf && shelf.read } />
-              </div>
-            </div>
-            <div className="open-search">
-              <Link to={`/search`}>Add a book</Link>
-            </div>
-          </div>
+          <Main
+            handleShelfChange={ this.handleShelfChange }
+            shelves={ shelves } />
         )} />
       </div>
     )
