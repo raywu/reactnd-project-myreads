@@ -1,6 +1,7 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
+import * as _ from 'lodash'
 import './App.css'
 import Search from './Search.js'
 import Main from './Main.js'
@@ -21,17 +22,20 @@ class BooksApp extends React.Component {
     typingTimeout: 0,
   };
 
+  groupBooks(books) {
+    return books.reduce((shelves, book) => {
+      if ( book && book.shelf && book.shelf !== 'none' ) {
+        shelves[book.shelf] ?
+          shelves[book.shelf].push(book) :
+          shelves[book.shelf] = [ book ];
+      }
+      return shelves;
+    }, {})
+  }
+
   reload() {
     BooksAPI.getAll().then((books) => {
-      const shelves =
-        books.reduce((shelves, book) => {
-          if ( book && book.shelf ) {
-            shelves[book.shelf] ?
-              shelves[book.shelf].push(book) :
-              shelves[book.shelf] = [ book ];
-          }
-          return shelves;
-        }, {})
+      const shelves = this.groupBooks(books);
       this.setState({ books, shelves });
     })
   }
@@ -69,7 +73,7 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const { query, shelves, searchResults } = this.state;
+    const { query, shelves, searchResults, books } = this.state;
 
     if (query) {
       this.searchBooks(query); // TODO: examine performance issue; callbacks make key stroke changes slow
@@ -82,7 +86,8 @@ class BooksApp extends React.Component {
             searchResults={ searchResults }
             handleShelfChange={ this.handleShelfChange }
             updateQuery={ this.updateQuery }
-            query={ query } />
+            query={ query }
+            existingBooks={ books } />
         )} />
         <Route exact path="/" render={() => (
           <Main

@@ -1,10 +1,12 @@
 import React from 'react'
+import * as _ from 'lodash'
 import Book from './Book.js'
 import { Link } from 'react-router-dom'
 
 class Search extends React.Component {
-  
+
   render() {
+    const { query, updateQuery, searchResults, existingBooks, handleShelfChange } = this.props;
     return (
       <div className="search-books">
         <div className="search-books-bar">
@@ -13,16 +15,20 @@ class Search extends React.Component {
             <input
               type="text"
               placeholder="Search by title or author"
-              value={this.props.query}
-              onChange={ (event) => this.props.updateQuery(event.target.value) } />
+              value={query}
+              onChange={ (event) => updateQuery(event.target.value) } />
 
           </div>
         </div>
         <div className="search-books-results">
           <ol className="books-grid">
             {
-              this.props.searchResults && this.props.searchResults instanceof Array && this.props.searchResults.map((book) => {
-                return <Book handleShelfChange={this.props.handleShelfChange} key={ book.id } book={ book } />
+              searchResults && searchResults instanceof Array && searchResults.map((book) => {
+                if (_.flatMap(existingBooks, (eb) => (eb.id)).includes(book.id)) {
+                  book = _.find(existingBooks, (existingBook) => (existingBook.id === book.id));
+                }
+
+                return <Book handleShelfChange={handleShelfChange} key={ book.id } book={ book } />;
               })
             }
           </ol>
