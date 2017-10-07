@@ -33,16 +33,39 @@ class BooksApp extends React.Component {
     }, {})
   }
 
-  reload() {
+  loadBooks() {
     BooksAPI.getAll().then((books) => {
       const shelves = this.groupBooks(books);
       this.setState({ books, shelves });
     })
   }
 
+  // updateShelves(books) {
+  //   const shelves = this.groupBooks(books);
+  //   this.setState({ shelves });
+  // }
+
   handleShelfChange(book, event) {
-    BooksAPI.update(book, event.target.value).then((shelves) => {
-      this.reload();
+    // const targetShelf = event.target.value,
+    //   searchResults = this.state.searchResults;
+    // let existingBooks = this.state.books;
+    //
+    // BooksAPI.update(book, targetShelf).then((newShelves) => {
+    //   // TODO: use newShelves
+    //   if (existingBooks.includes(book)) {
+    //     _.find(existingBooks, (eb) => { return eb === book }).shelf = targetShelf;
+    //     this.updateShelves(existingBooks)
+    //   } else {
+    //     const newBook = _.find(searchResults, (srb) => { return srb === book })
+    //     newBook.shelf = targetShelf;
+    //     existingBooks.push(newBook);
+    //     this.updateShelves(existingBooks);
+    //   }
+    // });
+
+    const targetShelf = event.target.value;
+    BooksAPI.update(book, targetShelf).then((newShelves) => {
+      this.loadBooks();
     });
   }
 
@@ -69,7 +92,7 @@ class BooksApp extends React.Component {
   }
 
   componentDidMount() {
-    this.reload();
+    this.loadBooks();
   }
 
   render() {
