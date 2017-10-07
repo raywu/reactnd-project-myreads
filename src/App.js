@@ -1,7 +1,6 @@
 import React from 'react'
 import { Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
-import escapeRegExp from 'escape-string-regexp'
 import './App.css'
 import Search from './Search.js'
 import Main from './Main.js'
@@ -10,6 +9,7 @@ class BooksApp extends React.Component {
   constructor(props) {
     super(props);
 
+    this.updateQuery = this.updateQuery.bind(this); // this binds updateQuery to BooksApp
     this.handleShelfChange = this.handleShelfChange.bind(this); // this binds handleShelfChange to App.js, followed explanation from https://stackoverflow.com/questions/37795133/react-setstate-between-components-es6
   }
 
@@ -18,6 +18,7 @@ class BooksApp extends React.Component {
     books: {},
     query: '',
     searchResults: [],
+    typingTimeout: 0,
   };
 
   reload() {
@@ -47,8 +48,20 @@ class BooksApp extends React.Component {
     });
   }
 
-  updateQuery = (value) => { // followed example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
-    this.setState({ query: value.trim() });
+  // followed updateQuery example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
+  // followed setTimeout example here https://stackoverflow.com/questions/42217121/searching-in-react-when-user-stops-typing
+  // TODO: keystroke performance issue still persists; there is a lag
+  updateQuery = (value) => {
+    if (this.state.typingTimeout) {
+       clearTimeout(this.state.typingTimeout);
+    }
+
+    this.setState({
+      query: value.replace(/\W/g, ' ').trim(),
+      typingTimeout: setTimeout(() => {
+        this.searchBooks(this.state.query);
+      }, 1000)
+    });
   }
 
   componentDidMount() {
@@ -56,19 +69,10 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const { query, shelves, searchResults } = this.state,
-      // TODO: parse ../SEARCH_TERMS.md directly
-      searchTerms = ['Android', 'Art', 'Artificial Intelligence', 'Astronomy', 'Austen', 'Baseball', 'Basketball', 'Bhagat', 'Biography', 'Brief', 'Business', 'Camus', 'Cervantes', 'Christie', 'Classics', 'Comics', 'Cook', 'Cricket', 'Cycling', 'Desai', 'Design', 'Development', 'Digital Marketing', 'Drama', 'Drawing', 'Dumas', 'Education', 'Everything', 'Fantasy', 'Film', 'Finance', 'First', 'Fitness', 'Football', 'Future', 'Games', 'Gandhi', 'Homer', 'Horror', 'Hugo', 'Ibsen', 'Journey',     'Kafka', 'King', 'Lahiri', 'Larsson', 'Learn', 'Literary Fiction', 'Make', 'Manage', 'Marquez', 'Money', 'Mystery', 'Negotiate', 'Painting', 'Philosophy', 'Photography', 'Poetry', 'Production', 'Programming', 'React', 'Redux', 'River', 'Robotics', 'Rowling', 'Satire', 'Science Fiction', 'Shakespeare', 'Singh', 'Swimming', 'Tale', 'Thrun', 'Time', 'Tolstoy', 'Travel', 'Ultimate', 'Virtual Reality', 'Web Development', 'iOS'
-      ];
-    let match, searchQuery;
+    const { query, shelves, searchResults } = this.state;
 
     if (query) {
-      match = new RegExp(escapeRegExp(query), 'i');
-      searchQuery = searchTerms.filter((term) => match.test(term));
-    }
-
-    if (searchQuery && searchQuery.length === 1) {
-      this.searchBooks(searchQuery[0]);
+      this.searchBooks(query); // TODO: examine performance issue; callbacks make key stroke changes slow
     }
 
     return (

@@ -3,7 +3,7 @@ import Book from './Book.js'
 import { Link } from 'react-router-dom'
 
 class Search extends React.Component {
-
+  
   render() {
     return (
       <div className="search-books">
@@ -21,7 +21,7 @@ class Search extends React.Component {
         <div className="search-books-results">
           <ol className="books-grid">
             {
-              this.props.searchResults && this.props.searchResults.map((book) => {
+              this.props.searchResults && this.props.searchResults instanceof Array && this.props.searchResults.map((book) => {
                 return <Book handleShelfChange={this.props.handleShelfChange} key={ book.id } book={ book } />
               })
             }
