@@ -15,7 +15,16 @@ class Book extends React.Component {
       <li>
         <div className="book">
           <div className="book-top">
-            <div className="book-cover" style={{ width: 128, height: 193, backgroundImage: 'url(' + book.imageLinks.smallThumbnail + ')' }}></div>
+            <div className="book-cover"
+              style={
+                {
+                  width: 128,
+                  height: 193,
+                  backgroundImage: book && book.imageLinks && book.imageLinks.smallThumbnail ?
+                    'url(' + book.imageLinks.smallThumbnail + ')' :
+                    null
+                }
+            } />
             <div className="book-shelf-changer">
               <select value={book.shelf} onChange={ this.props.handleShelfChange.bind(this, book) }>
                 <option value="none" disabled>Move to...</option>
