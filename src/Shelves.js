@@ -1,4 +1,5 @@
 import React from 'react'
+import * as _ from 'lodash'
 import Shelf from './Shelf.js'
 
 class Shelves extends React.Component {
@@ -13,8 +14,14 @@ class Shelves extends React.Component {
     return (
       <div>
         {
-          shelves.map((shelf) => {
-            return <Shelf key={ shelf.shelfName } handleShelfChange={ this.props.handleShelfChange } shelfName={shelf && shelf.shelfName} shelf={ shelf && shelf.shelf } />
+          Object.keys(shelves).map((shelfNameCamelCase) => {
+            return (
+              <Shelf
+                key={ shelfNameCamelCase }
+                handleShelfChange={ this.props.handleShelfChange }
+                shelfName={ _.startCase(shelfNameCamelCase) }
+                shelf={ shelves && shelves[shelfNameCamelCase] } />
+            )
           })
         }
       </div>
