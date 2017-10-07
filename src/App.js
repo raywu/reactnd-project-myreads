@@ -4,7 +4,7 @@ import * as BooksAPI from './BooksAPI'
 import escapeRegExp from 'escape-string-regexp'
 import './App.css'
 import Search from './Search.js'
-import Shelf from './Shelf.js'
+import Shelves from './Shelves.js'
 
 class BooksApp extends React.Component {
   constructor(props) {
@@ -86,11 +86,22 @@ class BooksApp extends React.Component {
               <h1>MyReads</h1>
             </div>
             <div className="list-books-content">
-              <div>
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
-                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Read" shelf={ shelf && shelf.read } />
-              </div>
+              <Shelves handleShelfChange={ this.handleShelfChange } shelves={
+                [
+                  {
+                    shelfName: 'Currently Reading',
+                    shelf: shelf.currentlyReading
+                  },
+                  {
+                    shelfName: 'Want to Read',
+                    shelf: shelf.wantToRead
+                  },
+                  {
+                    shelfName: 'Read',
+                    shelf: shelf.read
+                  },
+                ]
+              } />
             </div>
             <div className="open-search">
               <Link to={`/search`}>Add a book</Link>
