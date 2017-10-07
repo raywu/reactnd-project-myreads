@@ -87,9 +87,9 @@ class BooksApp extends React.Component {
             </div>
             <div className="list-books-content">
               <div>
-                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
-                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
-                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Read" shelf={ shelf && shelf.read } />
+                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
+                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
+                <Shelf handleShelfChange={ this.handleShelfChange } shelfName="Read" shelf={ shelf && shelf.read } />
               </div>
             </div>
             <div className="open-search">
