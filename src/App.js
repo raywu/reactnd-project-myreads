@@ -41,6 +41,12 @@ class BooksApp extends React.Component {
     });
   }
 
+  searchBooks(searchQuery) {
+    BooksAPI.search(searchQuery).then((books) => {
+      this.setState( { searchResults: books } );
+    });
+  }
+
   updateQuery = (value) => {
     this.setState({ query: value.trim() });
   }
@@ -62,9 +68,7 @@ class BooksApp extends React.Component {
     }
 
     if (searchQuery && searchQuery.length === 1) {
-      BooksAPI.search(searchQuery[0]).then((books) => {
-        this.setState( { searchResults: books } );
-      });
+      this.searchBooks(searchQuery[0]);
     }
 
     return (
