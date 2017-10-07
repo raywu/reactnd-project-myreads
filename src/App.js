@@ -7,6 +7,12 @@ import Shelf from './Shelf.js'
 import Book from './Book.js'
 
 class BooksApp extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.handleShelfChange = this.handleShelfChange.bind(this); // this binds handleShelfChange to App.js
+  }
+
   state = {
     shelf: {},
     books: {},
@@ -14,11 +20,7 @@ class BooksApp extends React.Component {
     searchResults: [],
   };
 
-  updateQuery = (value) => {
-    this.setState({ query: value.trim() });
-  }
-
-  componentDidMount() {
+  reload() {
     BooksAPI.getAll().then((books) => {
       const shelf =
         books.reduce((shelf, book) => {
@@ -33,8 +35,22 @@ class BooksApp extends React.Component {
     })
   }
 
+  handleShelfChange(book, event) {
+    BooksAPI.update(book, event.target.value).then((shelf) => {
+      this.reload();
+    });
+  }
+
+  updateQuery = (value) => {
+    this.setState({ query: value.trim() });
+  }
+
+  componentDidMount() {
+    this.reload();
+  }
+
   render() {
-    const { query, books, shelf, searchResults } = this.state,
+    const { query, shelf, searchResults } = this.state,
       // TODO: parse ../SEARCH_TERMS.md directly
       searchTerms = ['Android', 'Art', 'Artificial Intelligence', 'Astronomy', 'Austen', 'Baseball', 'Basketball', 'Bhagat', 'Biography', 'Brief', 'Business', 'Camus', 'Cervantes', 'Christie', 'Classics', 'Comics', 'Cook', 'Cricket', 'Cycling', 'Desai', 'Design', 'Development', 'Digital Marketing', 'Drama', 'Drawing', 'Dumas', 'Education', 'Everything', 'Fantasy', 'Film', 'Finance', 'First', 'Fitness', 'Football', 'Future', 'Games', 'Gandhi', 'Homer', 'Horror', 'Hugo', 'Ibsen', 'Journey',     'Kafka', 'King', 'Lahiri', 'Larsson', 'Learn', 'Literary Fiction', 'Make', 'Manage', 'Marquez', 'Money', 'Mystery', 'Negotiate', 'Painting', 'Philosophy', 'Photography', 'Poetry', 'Production', 'Programming', 'React', 'Redux', 'River', 'Robotics', 'Rowling', 'Satire', 'Science Fiction', 'Shakespeare', 'Singh', 'Swimming', 'Tale', 'Thrun', 'Time', 'Tolstoy', 'Travel', 'Ultimate', 'Virtual Reality', 'Web Development', 'iOS'
       ];
@@ -58,14 +74,6 @@ class BooksApp extends React.Component {
             <div className="search-books-bar">
               <Link className="close-search" to="/">Close</Link>
               <div className="search-books-input-wrapper">
-                {/*
-                  NOTES: The search from BooksAPI is limited to a particular set of search terms.
-                  You can find these search terms here:
-                  https://github.com/udacity/reactnd-project-myreads-starter/blob/master/SEARCH_TERMS.md
-
-                  However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
-                  you don't find a specific author or title. Every search is limited by search terms.
-                */}
                 <input
                   type="text"
                   placeholder="Search by title or author"
@@ -78,7 +86,7 @@ class BooksApp extends React.Component {
               <ol className="books-grid">
                 {
                   searchResults && searchResults.map((book) => {
-                    return <Book key={ book.id } book={ book } />
+                    return <Book handleShelfChange={this.handleShelfChange} key={ book.id } book={ book } />
                   })
                 }
               </ol>
@@ -92,9 +100,9 @@ class BooksApp extends React.Component {
             </div>
             <div className="list-books-content">
               <div>
-                <Shelf shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
-                <Shelf shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
-                <Shelf shelfName="Read" shelf={ shelf && shelf.read } />
+                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Currently Reading" shelf={ shelf && shelf.currentlyReading } />
+                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Want to Read" shelf={ shelf && shelf.wantToRead } />
+                <Shelf handleShelfChange={this.handleShelfChange} shelfName="Read" shelf={ shelf && shelf.read } />
               </div>
             </div>
             <div className="open-search">
