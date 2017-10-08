@@ -19,7 +19,6 @@ class BooksApp extends React.Component {
     books: {},
     query: '',
     searchResults: [],
-    typingTimeout: 0,
   };
 
   groupBooks(books) {
@@ -76,19 +75,16 @@ class BooksApp extends React.Component {
   }
 
   // followed updateQuery example from https://github.com/udacity/reactnd-contacts-complete/blob/master/src/ListContacts.js
-  // followed setTimeout example here https://stackoverflow.com/questions/42217121/searching-in-react-when-user-stops-typing
-  // TODO: keystroke performance issue still persists; there is a lag
+  // good explanation of lodash debounce vs throttle https://css-tricks.com/debouncing-throttling-explained-examples/
   updateQuery = (value) => {
-    if (this.state.typingTimeout) {
-       clearTimeout(this.state.typingTimeout);
-    }
-
+    const self = this,
+      debounceSearch = (() => {
+        self.searchBooks(self.state.query);
+      });
     this.setState({
       query: value.replace(/\W/g, ' ').trim(),
-      typingTimeout: setTimeout(() => {
-        this.searchBooks(this.state.query);
-      }, 1000)
     });
+    _.debounce(debounceSearch, 1000);
   }
 
   componentDidMount() {
