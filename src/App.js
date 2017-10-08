@@ -1,10 +1,11 @@
 import React from 'react'
-import { Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import * as _ from 'lodash'
 import './App.css'
 import Search from './Search.js'
 import Main from './Main.js'
+import NoMatch from './NoMatch.js'
 
 class BooksApp extends React.Component {
   constructor(props) {
@@ -15,7 +16,6 @@ class BooksApp extends React.Component {
   }
 
   state = {
-    shelves: {},
     books: {},
     query: '',
     searchResults: [],
@@ -34,40 +34,22 @@ class BooksApp extends React.Component {
 
   loadBooks() {
     BooksAPI.getAll().then((books) => {
-      const shelves = this.groupBooks(books);
-      this.setState({ books, shelves });
+      this.setState({ books });
     })
   }
 
-  // updateShelves(books) {
-  //   const shelves = this.groupBooks(books);
-  //   this.setState({ shelves });
-  // }
-
-  handleShelfChange(book, event) {
-    // const targetShelf = event.target.value,
-    //   searchResults = this.state.searchResults;
-    // let existingBooks = this.state.books;
-    //
-    // BooksAPI.update(book, targetShelf).then((newShelves) => {
-    //   // TODO: use newShelves
-    //   if (existingBooks.includes(book)) {
-    //     _.find(existingBooks, (eb) => { return eb === book }).shelf = targetShelf;
-    //     this.updateShelves(existingBooks)
-    //   } else {
-    //     const newBook = _.find(searchResults, (srb) => { return srb === book })
-    //     newBook.shelf = targetShelf;
-    //     existingBooks.push(newBook);
-    //     this.updateShelves(existingBooks);
-    //   }
-    // });
-
-    const targetShelf = event.target.value;
-    BooksAPI.update(book, targetShelf).then((newShelves) => {
-      this.loadBooks();
-    });
+  // per code review's suggestion,
+  // this filters out the updated book, then adds that same book with the updated shelf to the end of books.
+  // this implementation is a lot snappier!
+  handleShelfChange = (book, event) => {
+    const shelf = event.target.value; // cache synthetic event
+    BooksAPI.update(book, shelf).then(() => {
+      book.shelf = shelf;
+      this.setState((previousState) => (
+        { books: previousState.books.filter((b)=> (b.id !== book.id)).concat([ book ]) }
+      ))
+    })
   }
-
   searchBooks(searchQuery) {
     BooksAPI.search(searchQuery).then((books) => {
       this.setState( { searchResults: books } );
@@ -92,7 +74,8 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const { query, shelves, searchResults, books } = this.state;
+    const { query, searchResults, books } = this.state,
+      shelves = books.length > 0 ? this.groupBooks(books) : null;
 
     if (query) {
       this.searchBooks(query); // TODO: examine performance issue; callbacks make key stroke changes slow
@@ -100,19 +83,22 @@ class BooksApp extends React.Component {
 
     return (
       <div className="app">
-        <Route path="/search" render={() => (
-          <Search
-            searchResults={ searchResults }
-            handleShelfChange={ this.handleShelfChange }
-            updateQuery={ this.updateQuery }
-            query={ query }
-            existingBooks={ books } />
-        )} />
-        <Route exact path="/" render={() => (
-          <Main
-            handleShelfChange={ this.handleShelfChange }
-            shelves={ shelves } />
-        )} />
+        <Switch>
+          <Route path="/search" render={() => (
+            <Search
+              searchResults={ searchResults }
+              handleShelfChange={ this.handleShelfChange }
+              updateQuery={ this.updateQuery }
+              query={ query }
+              existingBooks={ books } />
+          )} />
+          <Route exact path="/" render={() => (
+            <Main
+              handleShelfChange={ this.handleShelfChange }
+              shelves={ shelves } />
+          )} />
+          <Route component={ NoMatch } />
+        </Switch>
       </div>
     )
   }
