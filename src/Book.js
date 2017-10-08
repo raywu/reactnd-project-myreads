@@ -18,7 +18,7 @@ const Book = (props) => {
                 height: 193,
                 backgroundImage: book && book.imageLinks && book.imageLinks.smallThumbnail ?
                   'url(' + book.imageLinks.smallThumbnail + ')' :
-                  null
+                  'url(http://via.placeholder.com/128x193?text=No%20Cover)'
               }
           } />
           <div className="book-shelf-changer">
