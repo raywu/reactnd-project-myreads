@@ -15,7 +15,7 @@ class BooksApp extends React.Component {
   }
 
   state = {
-    shelves: {},
+    // shelves: {},
     books: {},
     query: '',
     searchResults: [],
@@ -34,34 +34,13 @@ class BooksApp extends React.Component {
 
   loadBooks() {
     BooksAPI.getAll().then((books) => {
-      const shelves = this.groupBooks(books);
-      this.setState({ books, shelves });
+      // const shelves = this.groupBooks(books);
+      // this.setState({ books, shelves });
+      this.setState({ books });
     })
   }
 
-  // updateShelves(books) {
-  //   const shelves = this.groupBooks(books);
-  //   this.setState({ shelves });
-  // }
-
   handleShelfChange(book, event) {
-    // const targetShelf = event.target.value,
-    //   searchResults = this.state.searchResults;
-    // let existingBooks = this.state.books;
-    //
-    // BooksAPI.update(book, targetShelf).then((newShelves) => {
-    //   // TODO: use newShelves
-    //   if (existingBooks.includes(book)) {
-    //     _.find(existingBooks, (eb) => { return eb === book }).shelf = targetShelf;
-    //     this.updateShelves(existingBooks)
-    //   } else {
-    //     const newBook = _.find(searchResults, (srb) => { return srb === book })
-    //     newBook.shelf = targetShelf;
-    //     existingBooks.push(newBook);
-    //     this.updateShelves(existingBooks);
-    //   }
-    // });
-
     const targetShelf = event.target.value;
     BooksAPI.update(book, targetShelf).then((newShelves) => {
       this.loadBooks();
@@ -92,7 +71,9 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    const { query, shelves, searchResults, books } = this.state;
+    // const { query, shelves, searchResults, books } = this.state;
+    const { query, searchResults, books } = this.state,
+      shelves = books.length > 0 ? this.groupBooks(books) : null;
 
     if (query) {
       this.searchBooks(query); // TODO: examine performance issue; callbacks make key stroke changes slow
