@@ -40,13 +40,18 @@ class BooksApp extends React.Component {
     })
   }
 
-  handleShelfChange(book, event) {
-    const targetShelf = event.target.value;
-    BooksAPI.update(book, targetShelf).then((newShelves) => {
-      this.loadBooks();
-    });
+  // per code review's suggestion,
+  // this filters out the updated book, then adds that same book with the updated shelf to the end of books.
+  // this implementation is a lot snappier!
+  handleShelfChange = (book, event) => {
+    const shelf = event.target.value; // cache synthetic event
+    BooksAPI.update(book, shelf).then(() => {
+      book.shelf = shelf;
+      this.setState((previousState) => (
+        { books: previousState.books.filter((b)=> (b.id !== book.id)).concat([ book ]) }
+      ))
+    })
   }
-
   searchBooks(searchQuery) {
     BooksAPI.search(searchQuery).then((books) => {
       this.setState( { searchResults: books } );
