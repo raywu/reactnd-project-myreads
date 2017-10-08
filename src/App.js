@@ -1,10 +1,11 @@
 import React from 'react'
-import { Route } from 'react-router-dom'
+import { Switch, Route } from 'react-router-dom'
 import * as BooksAPI from './BooksAPI'
 import * as _ from 'lodash'
 import './App.css'
 import Search from './Search.js'
 import Main from './Main.js'
+import NoMatch from './NoMatch.js'
 
 class BooksApp extends React.Component {
   constructor(props) {
@@ -86,19 +87,22 @@ class BooksApp extends React.Component {
 
     return (
       <div className="app">
-        <Route path="/search" render={() => (
-          <Search
-            searchResults={ searchResults }
-            handleShelfChange={ this.handleShelfChange }
-            updateQuery={ this.updateQuery }
-            query={ query }
-            existingBooks={ books } />
-        )} />
-        <Route exact path="/" render={() => (
-          <Main
-            handleShelfChange={ this.handleShelfChange }
-            shelves={ shelves } />
-        )} />
+        <Switch>
+          <Route path="/search" render={() => (
+            <Search
+              searchResults={ searchResults }
+              handleShelfChange={ this.handleShelfChange }
+              updateQuery={ this.updateQuery }
+              query={ query }
+              existingBooks={ books } />
+          )} />
+          <Route exact path="/" render={() => (
+            <Main
+              handleShelfChange={ this.handleShelfChange }
+              shelves={ shelves } />
+          )} />
+          <Route component={ NoMatch } />
+        </Switch>
       </div>
     )
   }
