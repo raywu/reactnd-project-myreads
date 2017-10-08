@@ -16,7 +16,6 @@ class BooksApp extends React.Component {
   }
 
   state = {
-    // shelves: {},
     books: {},
     query: '',
     searchResults: [],
@@ -35,8 +34,6 @@ class BooksApp extends React.Component {
 
   loadBooks() {
     BooksAPI.getAll().then((books) => {
-      // const shelves = this.groupBooks(books);
-      // this.setState({ books, shelves });
       this.setState({ books });
     })
   }
@@ -77,7 +74,6 @@ class BooksApp extends React.Component {
   }
 
   render() {
-    // const { query, shelves, searchResults, books } = this.state;
     const { query, searchResults, books } = this.state,
       shelves = books.length > 0 ? this.groupBooks(books) : null;
 
